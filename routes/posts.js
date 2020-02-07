@@ -6,8 +6,8 @@ const auth = require("../middlewares/auth");
 /* GET users listing. */
 router.get('/', postController.index);
 router.post('/search', postController.search);
-router.post('/create', auth, postController.create);
-router.patch('/update', auth, postController.update);
-router.delete('/delete', auth, postController.delete);
+router.post('/', auth, postController.create);
+router.patch('/', auth, postController.update);
+router.delete('/', auth, postController.delete);
 
 module.exports = router;
