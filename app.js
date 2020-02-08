@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const config = require('config');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -10,7 +11,7 @@ const postsRouter = require('./routes/posts');
 const commentsRouter = require('./routes/comments');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const server = require("./init/start-app")(app);
 
 require("./init/db-config")();
 
@@ -46,8 +47,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-app.listen(port, () => {
-    console.log(`Listening to port ${port}`);
-
-})
-module.exports = app;
+module.exports = server;

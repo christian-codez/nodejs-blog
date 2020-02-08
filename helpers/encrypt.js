@@ -1,7 +1,5 @@
 const bcrypt = require('bcrypt');
 
-
-
 exports.encrypt = async(password) => {
     //encrypt password
     const saltRounds = 10;

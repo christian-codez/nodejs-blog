@@ -4,6 +4,7 @@ const generateToken = (user) => {
     const userSignature = {
         email: user.email,
         name: user.name,
+        id: user._id,
         role: user.role
     };
 

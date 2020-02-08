@@ -10,7 +10,7 @@ module.exports = async function() {
             useUnifiedTopology: true,
             useCreateIndex: true,
         });
-        console.log("Connected to: ", db);
+
     } catch (error) {
         console.log(error);
     }

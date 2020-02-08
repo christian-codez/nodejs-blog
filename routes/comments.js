@@ -3,10 +3,10 @@ const router = express.Router();
 const commentController = require("../controllers/commentController");
 const auth = require("../middlewares/auth");
 
-/* GET users listing. */
-router.get('/', commentController.index);
-router.post('/create', auth, commentController.create);
-router.patch('/update', auth, commentController.update);
-router.delete('/delete', auth, commentController.delete);
+/* GET comment listing. */
+router.get('/:post_id', commentController.index);
+router.post('/:post_id', auth, commentController.create);
+router.patch('/:post_id/:comment_id', auth, commentController.update);
+router.delete('/:post_id/:comment_id', auth, commentController.delete);
 
 module.exports = router;

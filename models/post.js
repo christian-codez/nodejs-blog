@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 
+const commentSchema = new mongoose.Schema({
+    user: mongoose.Schema.Types.ObjectId,
+    comment: { type: String, trim: true },
+    created: { type: Date, default: Date.now }
+});
+
 const postSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -23,9 +29,7 @@ const postSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    comments: {
-        type: Array,
-    }
+    comments: [commentSchema]
 });
 
 
@@ -52,6 +56,30 @@ postSchema.statics.updatePost = async function(req) {
 
 postSchema.statics.deletePost = async function(req) {
     return await this.findByIdAndDelete(req.body.post_id)
+}
+
+postSchema.statics.saveComment = async function(req) {
+    const postId = req.params.post_id;
+    return await this.findOneAndUpdate({ "_id": postId }, {
+        $push: {
+            comments: {
+                comment: req.body.comment,
+                user: req.user.id
+            }
+        }
+    }, { new: true });
+}
+
+postSchema.statics.getComments = async function(req) {
+    return await this.find({ _id: req.params.post_id }).select("-_id comments");
+}
+
+postSchema.statics.updateComments = async function(req) {
+    return await this.updateOne({ _id: req.params.post_id, "comments._id": req.params.comment_id }, { $set: { "comments.$.comment": req.body.comment } })
+}
+
+postSchema.statics.updateComments = async function(req) {
+    return await this.update({ "_id": req.params.post_id }, { $pull: { 'comments': { _id: req.params.comment_id } } })
 }
 
 const Post = mongoose.model('Post', postSchema);
