@@ -7,8 +7,9 @@ const auth = require("../middlewares/auth");
 
 /* GET users listing. */
 router.get('/', userController.index);
-router.post('/create', userController.create);
-router.patch('/update', auth, userController.update);
-router.delete('/delete', auth, userController.delete);
+router.get('/:id', userController.single);
+router.post('/', userController.create);
+router.patch('/', auth, userController.update);
+router.delete('/', auth, userController.delete);
 
 module.exports = router;

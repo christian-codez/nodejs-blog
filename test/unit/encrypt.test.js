@@ -1,10 +1,6 @@
-// beforeEach(() => {
-//     server = require("../../app");
-// });
-
 const { encrypt } = require("../../helpers/encrypt")
 
-describe('', () => {
+describe('ENCRYPTION FUNCTION:', () => {
     it('should not return the same password passed to it', async() => {
         const password = "1234";
         const hashedPassword = await encrypt(password);

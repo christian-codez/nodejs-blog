@@ -1,5 +1,6 @@
 const { asyncMiddleware } = require('../middlewares/asyncMiddleware')
 const { Post } = require("../models/post");
+const { validateUpdateComment } = require("../validations/comment-validation");
 
 exports.index = asyncMiddleware(async(req, res) => {
     const comments = await Post.getComments(req);
@@ -8,19 +9,23 @@ exports.index = asyncMiddleware(async(req, res) => {
 });
 
 exports.create = asyncMiddleware(async(req, res) => {
+    //validate the input sent
+    const { error } = validateUpdateComment(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
     const post = await Post.saveComment(req);
-    if (!post) return res.status(400).send("Oops! Comment could not be saved.")
+
     res.send(post);
 });
 
 exports.update = asyncMiddleware(async(req, res) => {
     const comment = await Post.updateComments(req);
-    if (!comment) return res.status(400).send("Oops! Comment could not be updated.")
+
     res.send(comment);
 });
 
 exports.delete = asyncMiddleware(async(req, res) => {
-    const comment = await Post.updateComments(req);
-    if (comment.nModified !== 1) return res.status(400).send("Oops! Comment could not be deleted.")
+    const comment = await Post.deleteComments(req);
+
     res.send(comment);
 });

@@ -14,11 +14,12 @@ const validateUpdatedPost = (request) => {
     const schema = Joi.object({
         title: Joi.string().min(5).max(50),
         content: Joi.string().min(5),
-        post_id: Joi.string().required()
     });
 
     return schema.validate(request);
 }
+
+
 
 
 module.exports = {

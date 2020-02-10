@@ -11,7 +11,7 @@ const postsRouter = require('./routes/posts');
 const commentsRouter = require('./routes/comments');
 
 const app = express();
-const server = require("./init/start-app")(app);
+const server = require("./init/server")(app);
 
 require("./init/db-config")();
 

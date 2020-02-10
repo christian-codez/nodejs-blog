@@ -48,14 +48,23 @@ postSchema.statics.getAll = async function() {
 
 postSchema.statics.updatePost = async function(req) {
     //update the user account
-    return await this.findOneAndUpdate({ _id: req.body.post_id }, {
+    return await this.findOneAndUpdate({ _id: req.params.id }, {
         "title": req.body.title,
         "content": req.body.content
     }, { new: true });
 };
 
 postSchema.statics.deletePost = async function(req) {
-    return await this.findByIdAndDelete(req.body.post_id)
+    return await this.findByIdAndDelete(req.params.id)
+}
+
+
+postSchema.statics.searchPost = function(req) {
+    return this.find({
+        $or: [
+            { 'title': { $regex: req.query.s, $options: 'i' } }, { 'content': { $regex: req.query.s, $options: 'i' } }
+        ]
+    });
 }
 
 postSchema.statics.saveComment = async function(req) {
@@ -78,7 +87,7 @@ postSchema.statics.updateComments = async function(req) {
     return await this.updateOne({ _id: req.params.post_id, "comments._id": req.params.comment_id }, { $set: { "comments.$.comment": req.body.comment } })
 }
 
-postSchema.statics.updateComments = async function(req) {
+postSchema.statics.deleteComments = async function(req) {
     return await this.update({ "_id": req.params.post_id }, { $pull: { 'comments': { _id: req.params.comment_id } } })
 }
 

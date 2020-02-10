@@ -61,6 +61,10 @@ userSchema.statics.getId = async function(email) {
     return await this.findOne({ email: email }).select("_id")
 }
 
+userSchema.statics.findUser = async function(req) {
+    return await this.findOne({ _id: req.params.id })
+}
+
 userSchema.statics.deleteUser = async function(req) {
     const id = await this.getId(req.user.email);
     return await this.findByIdAndDelete(id)
