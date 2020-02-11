@@ -47,7 +47,7 @@ describe('manage-tokens: ', () => {
             "stacks": ["python", "nodejs"]
         });
         user.save().then(data => user = data)
-        console.log(res)
+        const res = helpers.generateToken(user);
         expect(res).toBeTruthy();
     });
 });
