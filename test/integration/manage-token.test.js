@@ -25,32 +25,3 @@ describe('manage-tokens: ', () => {
         expect(res).toBeTruthy();
     });
 });
-
-
-
-// beforeEach(() => {
-//     mockUser = {
-//         "name": "John Doe",
-//         "email": "test1@gmail.com",
-//         "password": "12345",
-//         "gender": "male",
-//         "country": "USA",
-//         "age": "28",
-//         "bio": "This is a sample bio",
-//         "stacks": ["python", "nodejs"]
-//     }
-// });
-
-
-// afterEach(async() => {
-//     await User.deleteMany({});
-// });
-
-
-// describe('Creating Token: ', () => {
-//     it('should return false if an invalide user object was passed', async() => {
-//         const user = await createUser();
-
-//         console.log(user)
-//     });
-// });
