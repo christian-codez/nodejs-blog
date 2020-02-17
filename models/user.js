@@ -53,6 +53,13 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+
+userSchema.methods.toJSON = function() {
+    const user = this.toObject();
+    delete user.password;
+    return user;
+}
+
 userSchema.statics.getAll = async function(email) {
     return await this.find().select("-_id -password -role -verified")
 }

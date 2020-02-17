@@ -102,7 +102,7 @@ describe('/api/comments', () => {
 
             const res = await request(server)
                 .post(`/api/comments/5e3c7b6068a67544b013db3c`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({});
 
             expect(res.status).toBe(400);
@@ -123,12 +123,12 @@ describe('/api/comments', () => {
                     "stacks": ["python", "nodejs"]
                 });
 
-            const token = user.header['x-auth-token'];
+            const token = user.header['authorization'];
 
             //dummy post
             const post = await request(server)
                 .post("/api/posts/")
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({
                     'title': 'sample title',
                     'content': 'sample content.',
@@ -136,7 +136,7 @@ describe('/api/comments', () => {
 
             const res = await request(server)
                 .post(`/api/comments/${post.body._id}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({ "comment": "Sample xomment" });
 
             expect(res.status).toBe(200);

@@ -116,7 +116,7 @@ describe('/api/users', () => {
         it('should return new token if user was created', async() => {
             //create a new user
             const res = await request(server).post(`/api/users/`).send(mockUser);
-            expect(res.header).toHaveProperty("x-auth-token")
+            expect(res.header).toHaveProperty("authorization")
         });
 
 
@@ -136,12 +136,12 @@ describe('/api/users', () => {
                 .post(`/api/users/`)
                 .send(mockUser);
 
-            const token = user_res.header['x-auth-token'];
+            const token = user_res.header['authorization'];
             const name = "Daniel";
 
             const res = await request(server)
-                .patch(`/api/users/`)
-                .set("x-auth-token", token)
+                .patch(`/api/users/me`)
+                .set("authorization", token)
                 .send({ "name": name });
 
             expect(res.status).toBe(200)
@@ -154,30 +154,16 @@ describe('/api/users', () => {
                 .post(`/api/users/`)
                 .send(mockUser);
 
-            const token = user_res.header['x-auth-token'];
+            const token = user_res.header['authorization'];
             const name = "";
 
             const res = await request(server)
-                .patch(`/api/users/`)
-                .set("x-auth-token", token)
+                .patch(`/api/users/me`)
+                .set("authorization", token)
                 .send({ "name": name });
 
             expect(res.status).toBe(400)
         });
-
-
-        // it('should return new token if user was created', async() => {
-        //     //create a new user
-        //     const res = await request(server).post(`/api/users/`).send(mockUser);
-        //     expect(res.header).toHaveProperty("x-auth-token")
-        // });
-
-
-        // it('should return new user object', async() => {
-        //     //create a new user
-        //     const res = await request(server).post(`/api/users/`).send(mockUser);
-        //     expect(res.body).toHaveProperty("_id")
-        // });
 
     });
 
@@ -188,12 +174,12 @@ describe('/api/users', () => {
                 .post(`/api/users/`)
                 .send(mockUser);
 
-            const token = user_res.header['x-auth-token'];
+            const token = user_res.header['authorization'];
 
 
             const res = await request(server)
-                .delete(`/api/users/`)
-                .set("x-auth-token", token)
+                .delete(`/api/users/me`)
+                .set("authorization", token)
 
             expect(res.status).toBe(200)
         });

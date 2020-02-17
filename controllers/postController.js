@@ -46,7 +46,7 @@ exports.delete = asyncMiddleware(async(req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Please provide a valid Post ID")
 
     const post = await Post.deletePost(req);
-    if (!post) return res.status(400).send("Oops! post was not successfully deleted.");
+    if (!post.deletedCount) return res.status(400).send("Oops! post was not successfully deleted.");
 
     res.send(post);
 });

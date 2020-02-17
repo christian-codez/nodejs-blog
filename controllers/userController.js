@@ -27,10 +27,10 @@ exports.create = asyncMiddleware(async(req, res) => {
     if (!user) return res.status(400).send("Oops! User could not be created.");
 
     //generate token
-    const token = generateToken(req.body);
+    const token = generateToken(user);
 
     //send response to the user
-    res.header({ 'x-auth-token': token }).send(user);
+    res.header({ 'Authorization': token }).send(user);
 });
 
 exports.update = asyncMiddleware(async(req, res) => {
@@ -41,7 +41,9 @@ exports.update = asyncMiddleware(async(req, res) => {
     const updatedUser = await User.updateUser(req);
     if (!updatedUser) return res.status(400).send("Oops! User could not be updated.");
 
-    res.send(updatedUser);
+    //generate token
+    const token = generateToken(updatedUser);
+    res.header({ 'Authorization': token }).send(updatedUser);
 });
 
 exports.delete = asyncMiddleware(async(req, res) => {

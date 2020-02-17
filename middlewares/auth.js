@@ -1,18 +1,11 @@
 const helper = require("../helpers/manage-tokens")
-const { asyncMiddleware } = require("./asyncMiddleware");
-const { User } = require("../models/user")
-
-
-
 
 async function auth(req, res, next) {
     try {
-        const decodedToken = helper.verifyToken(req.header('X-Auth-Token'))
-        if (!decodedToken) return res.status(401).send('Access Denied. No token/Invalid token provided!')
+        const token = req.header('Authorization') ? req.header('Authorization').replace("Bearer ", "") : null;
+        const decodedToken = await helper.verifyToken(token);
+        if (typeof(decodedToken._id) === "undefined") return res.status(401).send('No/Invalid token provided!')
         req.user = decoded;
-        const idObj = await User.getId(req.user.email);
-        req.user.id = idObj.id;
-
         next();
     } catch (error) {
         res.status(400).send(error)

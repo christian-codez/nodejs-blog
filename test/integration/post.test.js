@@ -15,7 +15,7 @@ const createPost = async() => {
 
     await request(server)
         .post(`/api/posts/`)
-        .set("x-auth-token", token)
+        .set("Authorization", token)
         .send(post);
 
 }
@@ -64,8 +64,6 @@ describe('/api/posts/', () => {
 
         it('should return 404 if no post was found', async() => {
             const res = await request(server).get(`/api/posts/`);
-            console.log(res.body);
-
             expect(res.status).toBe(404);
         });
     });
@@ -79,7 +77,7 @@ describe('/api/posts/', () => {
             //create a mock post
             const res = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //var id = mongoose.Types.ObjectId();
@@ -93,7 +91,7 @@ describe('/api/posts/', () => {
             //create a mock post
             const res = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({});
 
             expect(res.status).toBe(400);
@@ -121,7 +119,7 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
 
@@ -142,7 +140,7 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
 
@@ -165,13 +163,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //UPDATE POST
             const res = await request(server)
                 .patch(`/api/posts/${posts.body._id}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({ "title": newTitle });
 
             //var id = mongoose.Types.ObjectId();
@@ -186,13 +184,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //UPDATE POST
             const res = await request(server)
                 .patch(`/api/posts/${posts.body._id}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({ "title": newTitle });
 
             //var id = mongoose.Types.ObjectId();
@@ -207,13 +205,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //UPDATE POST
             const res = await request(server)
                 .patch(`/api/posts/${posts.body._id}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({ "title": newTitle });
 
             //var id = mongoose.Types.ObjectId();
@@ -228,13 +226,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //UPDATE POST
             const res = await request(server)
                 .patch(`/api/posts/1234`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({ "title": newTitle });
 
             //const noExistingId = mongoose.Types.ObjectId();
@@ -250,13 +248,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //UPDATE POST
             const res = await request(server)
                 .patch(`/api/posts/${noExistingId}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send({ "title": newTitle });
 
             //const noExistingId = mongoose.Types.ObjectId();
@@ -276,13 +274,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //delete post
             const res = await request(server)
                 .delete(`/api/posts/1111`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
 
             expect(res.status).toBe(400);
         });
@@ -295,13 +293,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //delete post
             const res = await request(server)
                 .delete(`/api/posts/${noExistingId}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
 
             expect(res.status).toBe(400);
         });
@@ -314,13 +312,13 @@ describe('/api/posts/', () => {
             //create a mock post
             const posts = await request(server)
                 .post(`/api/posts/`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
                 .send(post);
 
             //delete post
             const res = await request(server)
                 .delete(`/api/posts/${posts.body._id}`)
-                .set("x-auth-token", token)
+                .set("authorization", token)
 
             expect(res.status).toBe(200);
         });

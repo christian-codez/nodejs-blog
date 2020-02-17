@@ -33,6 +33,8 @@ const postSchema = new mongoose.Schema({
 });
 
 
+
+
 postSchema.statics.createPost = async function(req) {
     const post = Post({
         'title': req.body.title,
@@ -55,7 +57,7 @@ postSchema.statics.updatePost = async function(req) {
 };
 
 postSchema.statics.deletePost = async function(req) {
-    return await this.findByIdAndDelete(req.params.id)
+    return await this.deleteOne({ _id: req.params.id, author: req.user.id });
 }
 
 
