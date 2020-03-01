@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+   
+          
+       <div class="container">
+            <h2 class="my-4">Welcome to NodeJs Blog</h2>
+            <!-- Users Endpoint -->
+            <div class="row">
+                <div class="col-md-4">
+                    <ul class="list-group">
+                        <li class="list-group-item active">Users API Endpoints</li>
+                        <li class="list-group-item"><code>GET: /api/users/</code> </li>
+                            <li class="list-group-item"><code>GET: /api/users/:userid </code></li>
+                            <li class="list-group-item">
+                                <code>POST: /api/users/</code>
+                                
+                                <div class="endpoint-params">
+                                    <h5>PARAMS: </h5> 
+                                    <p>STRING: <code> name </code> <i>(required)</i> </p>
+                                    <p> STRING: <code>email </code><i>(required)</i></p>
+                                    <p> STRING:  <code>password </code><i>(required)</i></p>
+                                    <p> STRING:  <code>gender </code></p>
+                                    <p>STRING: <code>country </code></p>
+                                    <p> STRING:  <code>age </code></p>
+                                    <p> STRING:  <code>bio </code></p>
+                                    <p> ARRAY:  <code>stacks </code></p>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <code>PATCH: /api/users/me</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                                <div class="endpoint-params">
+                                    <h5>PARAMS: </h5> 
+                                    <p>STRING: <code> name </code>  </p>
+                                    <p> STRING: <code>email </code> </p>
+                                    <p> STRING:  <code>password </code> </p>
+                                    <p> STRING:  <code>gender </code></p>
+                                    <p>STRING: <code>country </code></p>
+                                    <p> STRING:  <code>age </code></p>
+                                    <p> STRING:  <code>bio </code></p>
+                                    <p> ARRAY:  <code>stacks </code></p>
+                                </div>
+                            
+                            </li>
+                            <li class="list-group-item">
+                                <code>DELETE: /api/users/me</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+
+                            
+                            </li> 
+                      </ul>
+                </div>
+                <!-- Posts Endpoint -->
+                <div class="col-md-4">
+                    <ul class="list-group">
+                            <li class="list-group-item active">Posts API Endpoints</li>
+                            <li class="list-group-item"><code>GET: /api/posts/</code> </li>
+                            <li class="list-group-item"><code>GET: /api/posts/:userid </code></li>
+                            <li class="list-group-item"><code>GET: /api/posts/search?s=keyword </code></li>
+                            <li class="list-group-item">
+                                <code>POST: /api/posts/</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                                <div class="endpoint-params">
+                                    <h5>PARAMS: </h5> 
+                                    <p>STRING: <code> title </code> <i>(required)</i> </p>
+                                    <p> STRING: <code>content </code><i>(required)</i></p>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <code>PATCH: /api/posts/:id</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                                <div class="endpoint-params">
+                                    <h5>PARAMS: </h5> 
+                                    <p>STRING: <code> title </code>   </p>
+                                    <p> STRING: <code>content </code> </p>
+                                </div>
+                            
+                            </li>
+                            <li class="list-group-item">
+                                <code>DELETE: /api/posts/:id</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                            </li> 
+                      </ul>
+                </div>
+                <!-- Comments Endpoint -->
+                <div class="col-md-4">
+                    <ul class="list-group">
+                            <li class="list-group-item active">Comments API Endpoints</li>
+                            <li class="list-group-item"><code>GET: /api/comments/:post_id</code> </li>
+                           
+                            <li class="list-group-item">
+                                <code>POST: /api/comments/:post_id</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                                <div class="endpoint-params">
+                                    <h5>PARAMS: </h5> 
+                                    <p>STRING: <code> comment </code> <i>(required)</i> </p>
+                                 </div>
+                            </li>
+                            <li class="list-group-item">
+                                <code>PATCH: /api/comments/:post_id/:comment_id</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                                <div class="endpoint-params">
+                                    <h5>PARAMS: </h5> 
+                                    <p>STRING: <code> comment </code> <i>(required)</i> </p>
+                                </div>
+                            
+                            </li>
+                            <li class="list-group-item">
+                                <code>DELETE: /api/comments/:post_id/:comment_id</code>
+                                <p>This endpoint requires you to send a request with a token(named "authorization")</p>
+                            </li> 
+                      </ul>
+                </div>
+            </div>
+        </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>

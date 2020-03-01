@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.89% </span>
+                <span class="strong">92.11% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>34/37</span>
+                <span class='fraction'>35/38</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>30/30</span>
+                <span class='fraction'>31/31</span>
             </div>
         
             
@@ -110,15 +110,17 @@
 <a name='L51'></a><a href='#L51'>51</a>
 <a name='L52'></a><a href='#L52'>52</a>
 <a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -131,18 +133,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -167,17 +169,18 @@
 const { User } = require("../models/user");
 const { validateUserCreation, validateUserUpdate } = require("../validations/user-validation")
 const { generateToken } = require("../helpers/manage-tokens");
+const status = require('http-status');
 &nbsp;
+//returns all existing users
 exports.index = asyncMiddleware(async(req, res) =&gt; {
     const users = await User.getAll();
-    if (users.length &lt;= 0) return res.status(404).send("Oops! Users not found.");
-&nbsp;
+    if (users.length &lt;= 0) return res.status(status.NOT_FOUND).send("Oops! Users not found.");
     res.send(users);
 });
 &nbsp;
 exports.single = asyncMiddleware(async(req, res) =&gt; {
     const user = await User.findUser(req);
-    if (!user) return res.status(404).send("Oops! User was not found.");
+    if (!user) return res.status(status.NOT_FOUND).send("Oops! User was not found.");
 &nbsp;
     res.send(user);
 });
@@ -185,26 +188,26 @@ exports.single = asyncMiddleware(async(req, res) =&gt; {
 exports.create = asyncMiddleware(async(req, res) =&gt; {
     //validate user request
     const { error } = validateUserCreation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(status.BAD_REQUEST).send(error.details[0].message);
 &nbsp;
     //register new user
     const user = await User.register(req);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) <span class="cstat-no" title="statement not covered" >return res.status(400).send("Oops! User could not be created.");</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) <span class="cstat-no" title="statement not covered" >return res.status(status.BAD_REQUEST).send("Oops! User could not be created.");</span>
 &nbsp;
     //generate token
     const token = generateToken(user);
 &nbsp;
     //send response to the user
-    res.header({ 'Authorization': token }).send(user);
+    res.header({ 'authorization': token }).status(status.CREATED).send(user);
 });
 &nbsp;
 exports.update = asyncMiddleware(async(req, res) =&gt; {
     //validate user request
     const { error } = validateUserUpdate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(status.BAD_REQUEST).send(error.details[0].message);
 &nbsp;
     const updatedUser = await User.updateUser(req);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!updatedUser) <span class="cstat-no" title="statement not covered" >return res.status(400).send("Oops! User could not be updated.");</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!updatedUser) <span class="cstat-no" title="statement not covered" >return res.status(status.BAD_REQUEST).send("Oops! User could not be updated.");</span>
 &nbsp;
     //generate token
     const token = generateToken(updatedUser);
@@ -213,7 +216,7 @@ exports.update = asyncMiddleware(async(req, res) =&gt; {
 &nbsp;
 exports.delete = asyncMiddleware(async(req, res) =&gt; {
     const user = await User.deleteUser(req)
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) <span class="cstat-no" title="statement not covered" >return res.status(400).send("Oops! User could not be deleted.");</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) <span class="cstat-no" title="statement not covered" >return res.status(status.BAD_REQUEST).send("Oops! User could not be deleted.");</span>
 &nbsp;
     res.send(user);
 });</pre></td></tr></table></pre>
@@ -223,7 +226,7 @@ exports.delete = asyncMiddleware(async(req, res) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Feb 16 2020 20:23:31 GMT-0500 (Eastern Standard Time)
+                at Sun Mar 01 2020 17:21:01 GMT-0500 (Eastern Standard Time)
             </div>
         </div>
         <script src="../../prettify.js"></script>

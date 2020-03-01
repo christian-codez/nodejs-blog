@@ -22,6 +22,7 @@ const verifyToken = async(token) => {
         decoded = jwt.verify(token, process.env.jwtprivatekey);
         const user = await User.findOne({ _id: decoded.id });
         if (!user) throw new Error();
+        //if (!user.verified) throw new Error("please verify your account");
         return user;
     } catch (error) {
         return error;
@@ -31,6 +32,6 @@ const verifyToken = async(token) => {
 //set jwtprivatekey=jwtprivatekey
 
 module.exports = {
-    generateToken: generateToken,
-    verifyToken: verifyToken
+    generateToken,
+    verifyToken
 };

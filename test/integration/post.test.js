@@ -1,327 +1,215 @@
-/**
- * @jest-environment node
- */
-const mongoose = require('mongoose');
 const request = require('supertest');
-const helpers = require("../../helpers/manage-tokens")
-const { Post } = require("../../models/post");
-const { User } = require("../../models/user");
+const app = require("../../app");
+const { generateToken} = require("../../helpers/manage-tokens");
+const status = require('http-status');
 
-let mockUser, post, server;
-
-const createPost = async() => {
-    const user = await createUser();
-    const token = helpers.generateToken(user);
-
-    await request(server)
-        .post(`/api/posts/`)
-        .set("Authorization", token)
-        .send(post);
-
-}
-const createUser = async() => {
-    const user = new User(mockUser);
-    return await user.save();
-}
+const {
+    mockId,
+    userTwo,
+    PostThree,
+    postOne,
+    setupDatabase,
+    teardownDatabase
+} = require("../fixtures/db");
 
 describe('/api/posts/', () => {
-
     beforeEach(async() => {
-        server = require("../../app");
-        post = {
-            "title": "sample title 1",
-            "content": "sample content"
-        };
-
-        mockUser = {
-            "name": "John Doe",
-            "email": "test1@gmail.com",
-            "password": "12345",
-            "gender": "male",
-            "country": "USA",
-            "age": "28",
-            "bio": "This is a sample bio",
-            "stacks": ["python", "nodejs"]
-        }
+        await teardownDatabase()       
     });
-
-
+    
     afterEach(async() => {
-        await server.close();
-        await User.deleteMany({});
-        await Post.deleteMany({});
-
-    });
-
-    describe('GET: /', () => {
-        it('should return 200 if a post was found', async() => {
-            //create a mock post
-            await createPost()
-            const res = await request(server).get(`/api/posts/`);
-            //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(200);
-        });
-
-        it('should return 404 if no post was found', async() => {
-            const res = await request(server).get(`/api/posts/`);
-            expect(res.status).toBe(404);
-        });
+        await teardownDatabase()   
+        await app.close();
     });
 
 
-    describe('POST: /', () => {
-        it('should return 200 if a post was found', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
+    describe('GET: /api/posts/', () => {
 
-            //create a mock post
-            const res = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
+        it('should create a new post and return 200', async() => {
+          
+            await setupDatabase() 
 
-            //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(200);
-        });
+            const res = await request(app)
+                .get('/api/posts/')
+                .send();
 
-        it('should return 400 if invalid data was provided.', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
+            expect(res.status).toEqual(status.OK);
+            expect(res.body.length).toEqual(2);
+         });
 
-            //create a mock post
-            const res = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send({});
 
-            expect(res.status).toBe(400);
-        });
+        it('should return 404 if post does not exist', async() => {
+
+            const res = await request(app)
+                .get('/api/posts/')
+                .send();
+
+            expect(res.status).toEqual(status.NOT_FOUND);
+          });
     });
+    
+    
+    describe('GET: /api/posts/user/:userId', () => {
+
+        it('should return 200 if a post was found based on a user ID', async() => {
+          
+            await setupDatabase() 
+
+            const res = await request(app)
+                .get(`/api/posts/user/${userTwo._id}`)
+                .send();
+
+            expect(res.status).toEqual(status.OK);
+          });
+          
+          it('should return 404 if a post was not found based on a user ID', async() => {
+          
+            await setupDatabase() 
+
+            const res = await request(app)
+                .get(`/api/posts/user/${mockId}`)
+                .send();
+
+            expect(res.status).toEqual(status.NOT_FOUND);
+          });
+ 
+    });
+    
+    
+    describe('GET: /api/posts/search?s=keyword ', () => {
+
+        it('should return 404 if a post was not found based on a search keyword', async() => {
+          
+            await setupDatabase() 
+
+            const res = await request(app)
+                .get(`/api/posts/search?s=NotFound`)
+                .send();
+
+            expect(res.status).toEqual(status.NOT_FOUND);
+          });
 
 
-    describe('SEARCH: /', () => {
-        it('should return 400 if keyword was not provided', async() => {
+        it('should return 200 if a post was found based on a search keyword', async() => {
+          
+            await setupDatabase() 
 
-            //UPDATE POST
-            const res = await request(server)
+            const res = await request(app)
+                .get(`/api/posts/search?s=One`)
+                .send();
+
+            expect(res.status).toEqual(status.OK);
+          });
+          
+          
+          it('should return 400 if no search keyword was provided', async() => {
+          
+            await setupDatabase() 
+
+            const res = await request(app)
                 .get(`/api/posts/search`)
                 .send();
 
-            //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(400);
-        });
+            expect(res.status).toEqual(status.BAD_REQUEST);
+          });
+    });
 
-        it('should return 404 if keyword was not provided', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            post = { "title": "abcdef", "content": "This is a sample content." };
+    describe('POST: /api/posts/', () => {
 
-            //create a mock post
-            const posts = await request(server)
+        it('should return 201 if a post was created!', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
                 .post(`/api/posts/`)
                 .set("authorization", token)
-                .send(post);
+                .send(PostThree);
+
+            expect(res.status).toEqual(status.CREATED);
+          });
+          
+          it('should return 400 if invalid post data was sent', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .post(`/api/posts/`)
+                .set("authorization", token)
+                .send({'title': 'Test Title'});
+
+            expect(res.status).toEqual(status.BAD_REQUEST);
+          });
+    });
 
 
-            const res = await request(server)
-                .get(`/api/posts/search?s=notfound`)
+    describe('UPDATE: /api/posts/', () => {
+
+        it('should return 200 if a post was updated!', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .patch(`/api/posts/${postOne._id}`)
+                .set("authorization", token)
+                .send({title: 'New Title'});
+
+            expect(res.status).toEqual(status.OK);
+            expect(res.body.title).toEqual('New Title');
+          }); 
+          
+          it('should return 400 if an invalid data was sent!', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .patch(`/api/posts/${postOne._id}`)
+                .set("authorization", token)
+                .send({title: ''});
+
+            expect(res.status).toEqual(status.BAD_REQUEST);
+           });
+           
+           
+          it('should return 400 if an invalid post ID was provided!', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .patch(`/api/posts/123421`)
+                .set("authorization", token)
+                .send({title: ''});
+
+            expect(res.status).toEqual(status.BAD_REQUEST);
+           });
+       
+    });
+
+
+    describe('DELETE: /api/posts/', () => {
+
+        it('should return 200 if a post was deleted!', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .delete(`/api/posts/${postOne._id}`)
+                .set("authorization", token)
                 .send();
 
-            // //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(404);
-        });
-
-
-        it('should return 200 if keyword was found', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            post = { "title": "abcdef", "content": "This is a sample content." };
-
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
+            expect(res.status).toEqual(status.OK);
+        }); 
+        
+        
+        it('should return 400 if an invalid post ID was provided!', async() => {
+          
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .delete(`/api/posts/invalid123`)
                 .set("authorization", token)
-                .send(post);
-
-
-            const res = await request(server)
-                .get(`/api/posts/search?s=abcdef`)
                 .send();
 
-            // //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(200);
-        });
-
-    });
-
-
-    describe('PATCH: /', () => {
-        it('should return 200 if a post was updated successfully', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const newTitle = "New title";
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //UPDATE POST
-            const res = await request(server)
-                .patch(`/api/posts/${posts.body._id}`)
-                .set("authorization", token)
-                .send({ "title": newTitle });
-
-            //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(200);
-            expect(res.body.title).toBe(newTitle);
-        });
-
-        it('should return a valid post object if a post was updated successfully', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const newTitle = "New title";
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //UPDATE POST
-            const res = await request(server)
-                .patch(`/api/posts/${posts.body._id}`)
-                .set("authorization", token)
-                .send({ "title": newTitle });
-
-            //var id = mongoose.Types.ObjectId();
-            expect(res.body.title).toBe(newTitle);
-        });
-
-
-        it('should return 400 if an invalid input was sent', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const newTitle = "";
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //UPDATE POST
-            const res = await request(server)
-                .patch(`/api/posts/${posts.body._id}`)
-                .set("authorization", token)
-                .send({ "title": newTitle });
-
-            //var id = mongoose.Types.ObjectId();
-            expect(res.status).toBe(400);
-        });
-
-
-        it('should return 400 if an invalid post ID was passed', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const newTitle = "New title";
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //UPDATE POST
-            const res = await request(server)
-                .patch(`/api/posts/1234`)
-                .set("authorization", token)
-                .send({ "title": newTitle });
-
-            //const noExistingId = mongoose.Types.ObjectId();
-            expect(res.status).toBe(400);
-        });
-
-        it('should return 400 if a non existent post ID was passed', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const newTitle = "New title";
-            const noExistingId = mongoose.Types.ObjectId();
-
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //UPDATE POST
-            const res = await request(server)
-                .patch(`/api/posts/${noExistingId}`)
-                .set("authorization", token)
-                .send({ "title": newTitle });
-
-            //const noExistingId = mongoose.Types.ObjectId();
-            expect(res.status).toBe(400);
-        });
-
-
-    });
-
-
-    describe('DELETE: /', () => {
-
-        it('should return 400 if an invalid user ID was sent', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //delete post
-            const res = await request(server)
-                .delete(`/api/posts/1111`)
-                .set("authorization", token)
-
-            expect(res.status).toBe(400);
-        });
-
-        it('should return 400 if a post was not deleted.', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const noExistingId = mongoose.Types.ObjectId();
-
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //delete post
-            const res = await request(server)
-                .delete(`/api/posts/${noExistingId}`)
-                .set("authorization", token)
-
-            expect(res.status).toBe(400);
-        });
-
-        it('should return 200 if a post was deleted.', async() => {
-            const user = await createUser();
-            const token = helpers.generateToken(user);
-            const noExistingId = mongoose.Types.ObjectId();
-
-            //create a mock post
-            const posts = await request(server)
-                .post(`/api/posts/`)
-                .set("authorization", token)
-                .send(post);
-
-            //delete post
-            const res = await request(server)
-                .delete(`/api/posts/${posts.body._id}`)
-                .set("authorization", token)
-
-            expect(res.status).toBe(200);
-        });
-    });
-
+            expect(res.status).toEqual(status.BAD_REQUEST);
+        }); 
+   });
 });

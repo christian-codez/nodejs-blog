@@ -5,6 +5,7 @@ const auth = require("../middlewares/auth");
 
 /* GET users listing. */
 router.get('/', postController.index);
+router.get('/user/:userId', postController.postByUser);
 router.get('/search', postController.search);
 router.post('/', auth, postController.create);
 router.patch('/:id', auth, postController.update);

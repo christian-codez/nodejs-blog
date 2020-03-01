@@ -30,9 +30,9 @@ const postSchema = new mongoose.Schema({
         default: Date.now,
     },
     comments: [commentSchema]
+}, {
+    timestamps: true
 });
-
-
 
 
 postSchema.statics.createPost = async function(req) {
@@ -44,8 +44,23 @@ postSchema.statics.createPost = async function(req) {
     return await post.save()
 }
 
-postSchema.statics.getAll = async function() {
-    return await this.find();
+postSchema.statics.getAll = async function(req) {
+
+    const sort = {};
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(":");
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+    }
+
+    return await this.find()
+        .limit(parseInt(req.query.limit))
+        .skip((parseInt(req.query.page) * parseInt(req.query.limit)) - parseInt(req.query.limit))
+        .sort(sort);
+}
+
+postSchema.statics.postByUser = async function(req) {
+    //return await this.populate('user').where({ author: req.params.userId }).execPopulate();
+    return await this.find({ author: req.params.userId }).populate('author');
 }
 
 postSchema.statics.updatePost = async function(req) {

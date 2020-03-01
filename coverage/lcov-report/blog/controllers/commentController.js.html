@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/20</span>
+                <span class='fraction'>21/21</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.78% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/18</span>
+                <span class='fraction'>19/19</span>
             </div>
         
             
@@ -87,66 +87,69 @@
 <a name='L28'></a><a href='#L28'>28</a>
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const { asyncMiddleware } = require('../middlewares/asyncMiddleware')
 const { Post } = require("../models/post");
 const { validateUpdateComment } = require("../validations/comment-validation");
+const status = require('http-status');
 &nbsp;
 exports.index = asyncMiddleware(async(req, res) =&gt; {
     const comments = await Post.getComments(req);
-    if (comments.length &lt;= 0) return res.status(400).send("Oops! No comment was found.")
+    if (comments[0].comments.length &lt;= 0) return res.status(status.NOT_FOUND).send("Oops! No comment was found.")
+      
     res.send(comments);
 });
 &nbsp;
 exports.create = asyncMiddleware(async(req, res) =&gt; {
     //validate the input sent
     const { error } = validateUpdateComment(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(status.BAD_REQUEST).send(error.details[0].message);
 &nbsp;
     const post = await Post.saveComment(req);
 &nbsp;
     res.send(post);
 });
 &nbsp;
-exports.update = asyncMiddleware(<span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {
-    const comment = <span class="cstat-no" title="statement not covered" >await Post.updateComments(req);</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    res.send(comment);</span>
+exports.update = asyncMiddleware(async(req, res) =&gt; {
+    const comment = await Post.updateComments(req);
+    res.send(comment);
 });
 &nbsp;
-exports.delete = asyncMiddleware(<span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {
-    const comment = <span class="cstat-no" title="statement not covered" >await Post.deleteComments(req);</span>
+exports.delete = asyncMiddleware(async(req, res) =&gt; {
+    const comment = await Post.deleteComments(req);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.send(comment);</span>
+    res.send(comment);
 });</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -154,7 +157,7 @@ exports.delete = asyncMiddleware(<span class="fstat-no" title="function not cove
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Feb 16 2020 20:23:31 GMT-0500 (Eastern Standard Time)
+                at Sun Mar 01 2020 17:21:01 GMT-0500 (Eastern Standard Time)
             </div>
         </div>
         <script src="../../prettify.js"></script>

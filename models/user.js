@@ -51,12 +51,13 @@ const userSchema = new mongoose.Schema({
         minlength: 5,
         maxlength: 1000
     }
-});
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 
 userSchema.methods.toJSON = function() {
     const user = this.toObject();
     delete user.password;
+    delete user.__v;
     return user;
 }
 
@@ -64,17 +65,12 @@ userSchema.statics.getAll = async function(email) {
     return await this.find().select("-_id -password -role -verified")
 }
 
-userSchema.statics.getId = async function(email) {
-    return await this.findOne({ email: email }).select("_id")
-}
-
 userSchema.statics.findUser = async function(req) {
     return await this.findOne({ _id: req.params.id })
 }
 
 userSchema.statics.deleteUser = async function(req) {
-    const id = await this.getId(req.user.email);
-    return await this.findByIdAndDelete(id)
+    return await this.findByIdAndDelete(req.user.id)
 }
 
 userSchema.statics.register = async function(req) {
@@ -94,17 +90,21 @@ userSchema.statics.register = async function(req) {
 
 userSchema.statics.updateUser = async function(req) {
     //get the user Id
-    const id = await this.getId(req.user.email);
-
-    //update the user account
-    return await this.findOneAndUpdate({ _id: id }, {
+    let user = {
         "name": req.body.name,
         "stacks": req.body.stacks,
         "gender": req.body.gender,
         "age": req.body.age,
         "country": req.body.country,
         "bio": req.body.bio,
-    }, { new: true });
+    };
+
+    if (req.body.password) {
+        user.password = await helper.encrypt(req.body.password);
+    }
+
+    //update the user account
+    return await this.findOneAndUpdate({ _id: req.user.id }, user, { new: true });
 };
 
 userSchema.pre('save', async function(next) {

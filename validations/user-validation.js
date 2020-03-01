@@ -11,6 +11,7 @@ const validateUserCreation = (request) => {
         age: Joi.string(),
         stacks: Joi.array().items(Joi.string()),
         bio: Joi.string(),
+        verified: Joi.string(),
     });
 
     return schema.validate(request);

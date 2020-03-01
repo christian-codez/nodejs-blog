@@ -1,191 +1,190 @@
-/**
- * @jest-environment node
- */
-
 const request = require('supertest');
-const { User } = require("../../models/user");
-
-let server, mockUser;
-
-const createUsers = async() => {
-    await User.collection.insertMany([{
-            "name": "John Doe",
-            "email": "abc@gmail.com",
-            "password": "12345",
-            "gender": "male",
-            "country": "USA",
-            "age": "28",
-            "bio": "This is a sample bio",
-            "stacks": ["python", "nodejs"]
-        },
-        {
-            "name": "Mary Doe",
-            "email": "xyz@gmail.com",
-            "password": "12345",
-            "gender": "female",
-            "country": "Brazil",
-            "age": "28",
-            "bio": "This is a sample bio",
-            "stacks": ["python", "nodejs"]
-        }
+const app = require("../../app");
+const { generateToken} = require("../../helpers/manage-tokens");
+const status = require('http-status');
 
 
-    ])
-}
+const {
+    mockId,
+    userOne,
+    userTwo,
+    setupDatabase,
+    teardownDatabase
+} = require("../fixtures/db");
 
-const createUser = async() => {
-    const user = new User(mockUser);
-    return await user.save();
-}
+    describe('/api/users/', () => {
+
+        beforeEach(async() => {
+            await teardownDatabase()       
+        });
+        
+        afterEach(async() => {
+            await teardownDatabase()   
+            await app.close();
+        });
+
+                
+        describe('GET: /api/users/', () => {
+
+            it('should return a valid user', async() => {
+              
+                await setupDatabase() 
+
+                const res = await request(app)
+                    .get('/api/users/')
+                    .send();
+
+                expect(res.status).toEqual(status.OK);
+                expect(res.body.length).toEqual(2);
+             });
 
 
-describe('/api/users', () => {
+            it('should return 404 if a user was not found', async() => {
+              
+                const res = await request(app)
+                    .get('/api/users/')
+                    .send();
 
-    beforeEach(async() => {
-        server = require("../../app");
-        mockUser = {
-            "name": "John Doe",
-            "email": "test1@gmail.com",
-            "password": "12345",
-            "gender": "male",
-            "country": "USA",
-            "age": "28",
-            "bio": "This is a sample bio",
-            "stacks": ["python", "nodejs"]
-        }
+                expect(res.status).toEqual(status.NOT_FOUND);
+             });
+        
+           
+        });
+        
+        describe('GET: /api/users/:id', () => {
+
+            it('should return a valid user', async() => {
+              
+                await setupDatabase() 
+
+                const res = await request(app)
+                    .get(`/api/users/${userTwo._id}`)
+                    .send();
+
+                expect(res.status).toEqual(status.OK);
+              });
+
+
+            it('should return 404 if a user was not found', async() => {
+              
+                const res = await request(app)
+                    .get(`/api/users/${mockId}`)
+                    .send();
+
+                expect(res.status).toEqual(status.NOT_FOUND);
+             });
+        });  
+        
+        describe('POST: /api/users/', () => {
+
+            it('should create a new user and return 200', async() => {
+                const res = await request(app)
+                    .post('/api/users/')
+                    .send(userOne);
+        
+                expect(res.status).toEqual(status.CREATED);
+                expect(res.body._id).not.toBeNull()
+                expect(res.body.name).toEqual("Test One")
+            });
+        
+            it('should return a valid token if a user was successfully created', async() => {
+                const res = await request(app)
+                    .post('/api/users/')
+                    .send(userOne);
+        
+                expect(res.header).toHaveProperty("authorization");
+                expect(res.header.authorization).toBeTruthy();
+            });
+        
+            it('should return 400 if a bad input was supplied', async() => {
+                const res = await request(app)
+                    .post('/api/users/')
+                    .send({});
+        
+                expect(res.status).toEqual(status.BAD_REQUEST);
+            });
+        });
+    
+        describe('UPDATE: /api/users/me', () => {
+
+            it('should return 200 if a user was successfully updated', async() => {
+              
+                await setupDatabase() 
+                const token = generateToken(userTwo)
+
+                const res = await request(app)
+                    .patch(`/api/users/me`)
+                    .set("authorization", token)
+                    .send({name: "User Two"});
+
+                expect(res.status).toEqual(status.OK);
+                expect(res.body.name).toEqual('User Two');
+                expect(res.header.authorization).not.toBeNull();
+              });
+
+
+            it('should return 400 if an invalid data was sent', async() => {
+              
+                await setupDatabase() 
+                const token = generateToken(userTwo)
+
+                const res = await request(app)
+                    .patch(`/api/users/me`)
+                    .set("authorization", token)
+                    .send({name: ''});
+
+                expect(res.status).toEqual(status.BAD_REQUEST);
+          
+              }); 
+        });
+
+
+        describe('DELETE: /api/users/me', () => {
+
+            it('should return 200 if a user was successfully deleted', async() => {
+              
+                await setupDatabase() 
+                const token = generateToken(userTwo)
+
+                const res = await request(app)
+                    .delete(`/api/users/me`)
+                    .set("authorization", token)
+                    .send();
+            
+                
+                expect(res.status).toEqual(status.OK);
+                expect(res.body).toHaveProperty('_id');
+                expect(JSON.stringify(res.body._id)).toEqual(JSON.stringify(userTwo._id));
+               
+              });
+
+
+            it('should return 401 if bad token or no token was provided', async() => {
+              
+                await setupDatabase() 
+                const token = generateToken(userTwo)
+
+                const res = await request(app)
+                    .delete(`/api/users/me`)
+                    .set("authorization", 'wrongtoken')
+                    .send();
+            
+                
+                expect(res.status).toEqual(status.UNAUTHORIZED);
+ 
+               
+              });
+ 
+        });
+
+
+
     });
 
 
-    afterEach(async() => {
-        server.close();
-        await User.deleteMany({});
-    });
+
+    
 
 
-    describe('GET /', () => {
-        it('should return two newly created users', async() => {
-            await createUsers();
-            const res = await request(server).get('/api/users');
+  
 
-            //expect(res.body.length).toBe(2);
-            expect(res.status).toBe(200);
-            expect(res.body.some(user => user.name === "John Doe")).toBeTruthy()
-                // expect(res.body.some(user => user.name === "Mary Doe")).toBeTruthy()
-
-        });
-
-        it('should return 404 if not user was found', async() => {
-            const res = await request(server).get('/api/users');
-            expect(res.status).toBe(404);
-        });
-    });
-
-
-
-    describe('GET /:id', () => {
-        it('should return two newly created users', async() => {
-            //create a new user
-            const user = await createUser();
-            const res = await request(server).get(`/api/users/${user._id}`);
-
-            expect(res.body).toHaveProperty('_id')
-        });
-
-        it('should return 404 if the user does not exist', async() => {
-            //create a new user
-            const res = await request(server).get(`/api/users/5e3c55532a6664408c2f8309`);
-
-            expect(res.status).toBe(404);
-        });
-    });
-
-    describe('POST /', () => {
-        it('should return 400 if invalid input were sent', async() => {
-            //create a new user
-            const res = await request(server).post(`/api/users/`).send({ "name": "John Doe" });
-            expect(res.status).toBe(400)
-        });
-
-        it('should return 200 if a valid input were sent', async() => {
-            //create a new user
-            const res = await request(server).post(`/api/users/`).send(mockUser);
-            expect(res.status).toBe(200)
-        });
-
-
-        it('should return new token if user was created', async() => {
-            //create a new user
-            const res = await request(server).post(`/api/users/`).send(mockUser);
-            expect(res.header).toHaveProperty("authorization")
-        });
-
-
-        it('should return new user object', async() => {
-            //create a new user
-            const res = await request(server).post(`/api/users/`).send(mockUser);
-            expect(res.body).toHaveProperty("_id")
-        });
-
-    });
-
-
-    describe('UPDATE /', () => {
-        it('should return 200 if user was successfully updated', async() => {
-            //create a new user
-            const user_res = await request(server)
-                .post(`/api/users/`)
-                .send(mockUser);
-
-            const token = user_res.header['authorization'];
-            const name = "Daniel";
-
-            const res = await request(server)
-                .patch(`/api/users/me`)
-                .set("authorization", token)
-                .send({ "name": name });
-
-            expect(res.status).toBe(200)
-            expect(res.body.name).toBe(name)
-        });
-
-        it('should return 400 if a valid input were sent', async() => {
-            //create a new user
-            const user_res = await request(server)
-                .post(`/api/users/`)
-                .send(mockUser);
-
-            const token = user_res.header['authorization'];
-            const name = "";
-
-            const res = await request(server)
-                .patch(`/api/users/me`)
-                .set("authorization", token)
-                .send({ "name": name });
-
-            expect(res.status).toBe(400)
-        });
-
-    });
-
-    describe('DELETE: /', () => {
-        it('should return 200 if user was successfully deleted', async() => {
-            //create a new user
-            const user_res = await request(server)
-                .post(`/api/users/`)
-                .send(mockUser);
-
-            const token = user_res.header['authorization'];
-
-
-            const res = await request(server)
-                .delete(`/api/users/me`)
-                .set("authorization", token)
-
-            expect(res.status).toBe(200)
-        });
-
-    });
-
-
-
-});

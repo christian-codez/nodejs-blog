@@ -1,150 +1,122 @@
-/**
- * @jest-environment node
- */
-
 const request = require('supertest');
-const { User } = require("../../models/user");
-const { Post } = require("../../models/post");
-const helpers = require("../../helpers/manage-tokens")
+const app = require("../../app");
+const { generateToken} = require("../../helpers/manage-tokens");
+const status = require('http-status');
 
-let server, mockUser;
+const {
+    mockId,
+    userTwo,
+    PostThree,
+    commentId,
+    postTwo,
+    postOne,
+    setupDatabase,
+    teardownDatabase
+} = require("../fixtures/db");
 
-const createPost = async() => {
-    const user = await createUser();
-    //create comment
-    let post = new Post({
-        'title': 'sample title',
-        'content': 'sample content.',
-        'author': user._id,
-        'comments': [{
-            comment: 'sample comment',
-            user: user._id
-        }, {
-            comment: 'sample comment 2',
-            user: user._id
-        }]
-    });
-
-    post = await post.save();
-
-    return post;
-}
-
-
-const createPostOnly = async() => {
-    const user = await createUser();
-    //create comment
-    let post = new Post({
-        'title': 'sample title',
-        'content': 'sample content.',
-        'author': user._id,
-    });
-
-    post = await post.save();
-
-    return post;
-}
-
-
-
-
-const createUser = async() => {
-    const user = new User(mockUser);
-    return await user.save();
-}
-
-
-describe('/api/comments', () => {
-
+describe('/api/comments/', () => {
     beforeEach(async() => {
-        server = require("../../app");
-        mockUser = {
-            "name": "John Doe",
-            "email": "test1@gmail.com",
-            "password": "12345",
-            "gender": "male",
-            "country": "USA",
-            "age": "28",
-            "bio": "This is a sample bio",
-            "stacks": ["python", "nodejs"]
-        }
+        await teardownDatabase()       
     });
-
-
+    
     afterEach(async() => {
-        await server.close();
-        await User.deleteMany({});
-        await Post.deleteMany({});
-
+        await teardownDatabase()   
+        await app.close();
     });
 
-    describe('GET /', () => {
 
-        it('should return 200 if a comment is created', async() => {
-            const post = await createPost(); //create a mock post
-            const res = await request(server).get(`/api/comments/${post._id}`);
+    describe('GET: /api/comments/:postID', () => {
 
-            expect(res.status).toBe(200);
-        });
+        it('should return all comments related to a particluar post', async() => {
+            await setupDatabase() 
 
-        it('should return 400 if no comment was found.', async() => {
-            const res = await request(server).get(`/api/comments/5e3c7b6068a67544b013db3c`);
+            const res = await request(app)
+                .get(`/api/comments/${postOne._id}`)
+                .send();
+                                 
+            expect(res.status).toEqual(status.OK)
+            expect(res.body[0].comments.length).toEqual(2)
+         });
 
-            expect(res.status).toBe(400);
-        });
-    });
 
-    describe('POST /', () => {
+        it('should return 404 if comment does not exist', async() => {
+            await setupDatabase() 
 
-        it('should return 400 if an invalid comment was sent', async() => {
-            const user = await createUser(); //generate mock user
-            const token = helpers.generateToken(user) //generate sample token
+            const res = await request(app)
+                .get(`/api/comments/${postTwo._id}`)
+                .send();
 
-            const res = await request(server)
-                .post(`/api/comments/5e3c7b6068a67544b013db3c`)
-                .set("authorization", token)
-                .send({});
-
-            expect(res.status).toBe(400);
-        });
-
-        it('should return 200 if comment was created', async() => {
-            //dummy user
-            let user = await request(server)
-                .post(`/api/users/`)
-                .send({
-                    "name": "John Doe",
-                    "email": "test12@gmail.com",
-                    "password": "12345",
-                    "gender": "male",
-                    "country": "USA",
-                    "age": "28",
-                    "bio": "This is a sample bio",
-                    "stacks": ["python", "nodejs"]
-                });
-
-            const token = user.header['authorization'];
-
-            //dummy post
-            const post = await request(server)
-                .post("/api/posts/")
+                console.log('STATUS: ', res.status)                 
+            expect(res.status).toEqual(status.NOT_FOUND)
+          });
+ 
+    }); 
+    
+    
+    describe('POST: /api/comments/:postID', () => {
+ 
+        it('should post a new comment', async() => {
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .post(`/api/comments/${postOne._id}`)
                 .set("authorization", token)
                 .send({
-                    'title': 'sample title',
-                    'content': 'sample content.',
+                    "comment": "This is a another great comment 1"
                 });
+                                
+            expect(res.status).toEqual(status.OK)
+            expect(res.body.comments.length).toEqual(3)
+          });
 
-            const res = await request(server)
-                .post(`/api/comments/${post.body._id}`)
+
+        it('should return 400 if a bad request was sent', async() => {
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .post(`/api/comments/${postOne._id}`)
                 .set("authorization", token)
-                .send({ "comment": "Sample xomment" });
-
-            expect(res.status).toBe(200);
-        });
-
-
+                .send({
+                    "comment": ""
+                });
+                                 
+            expect(res.status).toEqual(status.BAD_REQUEST)
+           });
+ 
     });
-
-
-
+    
+    describe('PATCH: /api/comments/:post_id/:comment_id', () => {
+ 
+        it('should post a new comment', async() => {
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .patch(`/api/comments/${postOne._id}/${commentId}`)
+                .set("authorization", token)
+                .send({
+                    "comment": "This is a another great comment 1"
+                });
+                                 
+            expect(res.status).toEqual(status.OK)
+            expect(res.body.nModified).toEqual(1)
+          });
+ 
+    });
+    
+    describe('DELETE: /api/comments/:post_id/:comment_id', () => {
+ 
+        it('should delete new comment', async() => {
+            await setupDatabase() 
+            const token = generateToken(userTwo)
+            const res = await request(app)
+                .delete(`/api/comments/${postOne._id}/${commentId}`)
+                .set("authorization", token)
+                .send();
+                                
+            expect(res.status).toEqual(status.OK)
+            expect(res.body.nModified).toEqual(1)
+          });
+ 
+    });
+ 
 });
