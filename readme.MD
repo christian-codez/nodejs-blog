@@ -1,8 +1,8 @@
 ---
 # Welcome to Nodjs Blog API 8-)
-::: warning
+
 ### Users API Endpoints
-:::
+
 
 - `GET: /api/users/`
 - `GET: /api/users/:userid`
@@ -36,9 +36,9 @@ This endpoint requires you to send a request with a token(named "authorization")
 - `DELETE: /api/users/me`
 This endpoint requires you to send a request with a token(named "authorization")
 
-::: warning 
+ 
 ### Posts API Endpoints
-:::  
+
 - `GET: /api/posts/`
 - `GET: /api/posts/:userid`
 - `GET: /api/posts/search?s=keyword`
@@ -61,9 +61,9 @@ This endpoint requires you to send a request with a token(named "authorization")
 This endpoint requires you to send a request with a token(named "authorization")
 
 
-::: warning
+
 ### Comments API Endpoints
-:::  
+
 - `GET: /api/comments/:post_id`
 - `POST: /api/comments/:post_id` This endpoint requires you to send a request with a token(named "authorization")
 
